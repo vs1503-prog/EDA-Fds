@@ -1,0 +1,50 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load all datasets
+files = ['JAN_2019.csv', 'FEB_2019.csv', 'MAR_2019.csv', 'APR_2019.csv', 'JUNE2019.csv']
+dataframes = [pd.read_csv(f) for f in files]
+
+# Combine all into one DataFrame
+df = pd.concat(dataframes, ignore_index=True)
+
+# Remove null values
+df = df.dropna()
+
+# Show first few rows
+print("First 5 Rows:")
+print(df.head())
+
+# Example numerical column — change 'Sales' to your column name if different
+col = 'Sales'
+
+# Mean, Median, Mode
+print("\nMean:", df[col].mean())
+print("Median:", df[col].median())
+print("Mode:\n", df[col].mode())
+
+# Detect outliers using IQR
+Q1 = df[col].quantile(0.25)
+Q3 = df[col].quantile(0.75)
+IQR = Q3 - Q1
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+outliers = df[(df[col] < lower) | (df[col] > upper)]
+print("\nNumber of Outliers:", len(outliers))
+
+# Remove outliers
+df_no_outliers = df[(df[col] >= lower) & (df[col] <= upper)]
+
+# Plot boxplots before and after removing outliers
+plt.figure(figsize=(10, 4))
+
+plt.subplot(1, 2, 1)
+plt.boxplot(df[col])
+plt.title('With Outliers')
+
+plt.subplot(1, 2, 2)
+plt.boxplot(df_no_outliers[col])
+plt.title('Without Outliers')
+
+plt.show()
